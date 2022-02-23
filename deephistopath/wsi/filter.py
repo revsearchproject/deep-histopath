@@ -283,7 +283,7 @@ def filter_remove_small_holes(np_img, min_size=3000, output_type="uint8"):
   """
   t = Time()
 
-  rem_sm = sk_morphology.remove_small_holes(np_img, min_size=min_size)
+  rem_sm = sk_morphology.remove_small_holes(np_img, area_threshold=min_size)
 
   if output_type == "bool":
     pass
@@ -939,6 +939,19 @@ def filter_blue(rgb, red_upper_thresh, green_upper_thresh, blue_lower_thresh, ou
     util.np_info(result, "Filter Blue", t.elapsed())
   return result
 
+def filter_black_pen(rgb, output_type = "bool"):
+  hsv = sk_color.rgb2hsv(rgb)
+  v = hsv[:,:,0] < 120
+  t = Time()
+  result = ~v
+  if output_type == "bool":
+    pass
+  elif output_type == "float":
+    result = result.astype(float)
+  else:
+    result = result.astype("uint8") * 255
+  util.np_info(result, "Filter Blue", t.elapsed())
+  return result
 
 def filter_blue_pen(rgb, output_type="bool"):
   """

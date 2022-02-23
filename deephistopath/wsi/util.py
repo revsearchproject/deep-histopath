@@ -20,7 +20,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 # If True, display additional NumPy array stats (min, max, mean, is_binary).
 ADDITIONAL_NP_STATS = False
-
+FONT_PATH = "./NanumPen.ttf"
 
 def pil_to_np_rgb(pil_img):
   """
@@ -84,7 +84,7 @@ def np_info(np_arr, name=None, elapsed=None):
       name, str(elapsed), min, max, mean, is_binary, np_arr.dtype, np_arr.shape))
 
 
-def display_img(np_img, text=None, font_path="/Library/Fonts/Arial Bold.ttf", size=48, color=(255, 0, 0),
+def display_img(np_img, text=None, font_path=FONT_PATH, size=48, color=(255, 0, 0),
                 background=(255, 255, 255), border=(0, 0, 0), bg=False):
   """
   Convert a NumPy array to a PIL image, add text to the image, and display the image.
