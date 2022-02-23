@@ -26,7 +26,7 @@ import skimage.filters as sk_filters
 import skimage.future as sk_future
 import skimage.morphology as sk_morphology
 import skimage.segmentation as sk_segmentation
-
+import cv2
 from deephistopath.wsi import slide
 from deephistopath.wsi import util
 from deephistopath.wsi.util import Time
@@ -729,7 +729,7 @@ def filter_threshold(np_img, threshold, output_type="bool"):
   return result
 
 
-def filter_green_channel(np_img, green_thresh=200, avoid_overmask=True, overmask_thresh=90, output_type="bool"):
+def filter_green_channel(np_img, green_thresh=220, avoid_overmask=True, overmask_thresh=90, output_type="bool"):
   """
   Create a mask to filter out pixels with a green channel value greater than a particular threshold, since hematoxylin
   and eosin are purplish and pinkish, which do not have much green to them.
@@ -940,10 +940,10 @@ def filter_blue(rgb, red_upper_thresh, green_upper_thresh, blue_lower_thresh, ou
   return result
 
 def filter_black_pen(rgb, output_type = "bool"):
-  hsv = sk_color.rgb2hsv(rgb)
-  v = hsv[:,:,0] < 120
+  hsv = cv2.cvtColor(rgb, cv2.COLOR_RGB2HSV)
+  v = hsv[:,:,2] > 128
   t = Time()
-  result = ~v
+  result = v
   if output_type == "bool":
     pass
   elif output_type == "float":
@@ -1068,15 +1068,20 @@ def apply_image_filters(np_img, slide_num=None, info=None, save=False, display=F
   mask_no_blue_pen = filter_blue_pen(rgb)
   rgb_no_blue_pen = util.mask_rgb(rgb, mask_no_blue_pen)
   save_display(save, display, info, rgb_no_blue_pen, slide_num, 6, "No Blue Pen", "rgb-no-blue-pen")
+  
+  mask_no_black_pen = filter_black_pen(rgb)
+  print(mask_no_black_pen)
+  rgb_no_black_pen = util.mask_rgb(rgb, mask_no_black_pen)
+  save_display(save, display, info, rgb_no_black_pen, slide_num, 7, "No Black Pen", "rgb-no-black-pen")
 
-  mask_gray_green_pens = mask_not_gray & mask_not_green & mask_no_red_pen & mask_no_green_pen & mask_no_blue_pen
+  mask_gray_green_pens = mask_not_gray & mask_not_green & mask_no_red_pen & mask_no_green_pen & mask_no_blue_pen & mask_no_black_pen
   rgb_gray_green_pens = util.mask_rgb(rgb, mask_gray_green_pens)
-  save_display(save, display, info, rgb_gray_green_pens, slide_num, 7, "Not Gray, Not Green, No Pens",
+  save_display(save, display, info, rgb_gray_green_pens, slide_num, 8, "Not Gray, Not Green, No Pens",
                "rgb-no-gray-no-green-no-pens")
 
   mask_remove_small = filter_remove_small_objects(mask_gray_green_pens, min_size=500, output_type="bool")
   rgb_remove_small = util.mask_rgb(rgb, mask_remove_small)
-  save_display(save, display, info, rgb_remove_small, slide_num, 8,
+  save_display(save, display, info, rgb_remove_small, slide_num, 9,
                "Not Gray, Not Green, No Pens,\nRemove Small Objects",
                "rgb-not-green-not-gray-no-pens-remove-small")
 
